@@ -1,93 +1,466 @@
-# vg-ms-users
+# VG-MS-USERS - Microservicio de Gestión de Usuarios
 
+Microservicio REST para la gestión de usuarios implementado con **Arquitectura Hexagonal (Clean Architecture)**, desarrollado con **Spring WebFlux** y **MongoDB Atlas**.
 
+---
 
-## Getting started
+## 🏗️ Arquitectura Hexagonal
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Estructura del Proyecto
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/vallegrande/as241s5_prs4/vg-ms-users.git
-git branch -M main
-git push -uf origin main
+vg-ms-users/
+│
+├── 🎯 domain/                              # LÓGICA DE NEGOCIO
+│   ├── models/
+│   │   └── Users.java                      # Entidad de dominio
+│   │
+│   ├── ports/
+│   │   ├── in/                             # Casos de uso (lo que puede hacer)
+│   │   │   ├── ICreateUsersUseCase.java
+│   │   │   ├── IGetUsersUseCase.java
+│   │   │   ├── IUpdateUsersUseCase.java
+│   │   │   ├── IDeactivateUsersUseCase.java
+│   │   │   └── IRestoreUsersUseCase.java
+│   │   │
+│   │   └── out/                            # Repositorios (cómo guardar)
+│   │       └── IUsersRepository.java
+│   │
+│   └── exceptions/                         # Errores de negocio
+│       ├── DomainException.java
+│       └── NotFoundException.java
+│
+├── 🔄 application/                         # ORQUESTACIÓN
+│   ├── usecases/                           # Implementa la lógica
+│   │   ├── CreateUsersUseCaseImpl.java
+│   │   ├── GetUsersUseCaseImpl.java
+│   │   ├── UpdateUsersUseCaseImpl.java
+│   │   ├── DeactivateUsersUseCaseImpl.java
+│   │   └── RestoreUsersUseCaseImpl.java
+│   │
+│   ├── dto/                                # Contratos de entrada/salida
+│   │   ├── request/
+│   │   │   ├── CreateUsersRequest.java
+│   │   │   └── UpdateUsersRequest.java
+│   │   │
+│   │   ├── response/
+│   │   │   └── UsersResponse.java
+│   │   │
+│   │   └── common/
+│   │       ├── ApiResponse.java
+│   │       └── ErrorResponse.java
+│   │
+│   └── mappers/
+│       └── UsersMapper.java                # Convierte DTO ↔ Entity
+│
+└── ⚙️ infrastructure/                      # TECNOLOGÍA
+    ├── adapters/
+    │   ├── in/
+    │   │   └── rest/
+    │   │       └── UsersController.java    # Endpoints REST
+    │   │
+    │   └── out/
+    │       └── persistence/
+    │           ├── UsersDocument.java      # Modelo MongoDB
+    │           ├── UsersMongoRepository.java
+    │           └── UsersRepositoryAdapter.java
+    │
+    └── config/
+        ├── BeanConfiguration.java
+        ├── GlobalExceptionHandler.java
+        └── OpenApiConfiguration.java
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/vallegrande/as241s5_prs4/vg-ms-users/-/settings/integrations)
+## 📐 Capas de la Arquitectura
 
-## Collaborate with your team
+### 🎯 Domain (Dominio)
+- **Responsabilidad:** Lógica de negocio pura
+- **Contenido:** Entidades, interfaces de casos de uso, excepciones
+- **Dependencias:** Ninguna (independiente de frameworks)
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### 🔄 Application (Aplicación)
+- **Responsabilidad:** Orquestación de casos de uso
+- **Contenido:** Implementación de casos de uso, DTOs, mappers
+- **Dependencias:** Solo del dominio
 
-## Test and Deploy
+### ⚙️ Infrastructure (Infraestructura)
+- **Responsabilidad:** Detalles técnicos y frameworks
+- **Contenido:** Controladores REST, repositorios MongoDB, configuración
+- **Dependencias:** Del dominio y aplicación
 
-Use the built-in continuous integration in GitLab.
+---
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+## 🎯 Principios de la Arquitectura
 
-***
+- **Independencia de Frameworks:** El dominio no depende de Spring, MongoDB ni ningún framework
+- **Inversión de Dependencias:** Las dependencias apuntan hacia el dominio
+- **Separación de Responsabilidades:** Cada capa tiene una responsabilidad clara
+- **Testabilidad:** Los casos de uso pueden testearse sin base de datos
+- **Programación Reactiva:** Uso de `Mono` y `Flux` con Spring WebFlux
 
-# Editing this README
+---
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## 🔄 Flujo de una Petición
 
-## Suggestions for a good README
+```
+Cliente HTTP
+    ↓
+UsersController (Infrastructure/Adapters/In/Rest)
+    ↓
+CreateUsersUseCase (Application/UseCases)
+    ↓
+IUsersRepository (Domain/Ports/Out)
+    ↓
+UsersRepositoryAdapter (Infrastructure/Adapters/Out/Persistence)
+    ↓
+UsersMongoRepository (Infrastructure/Adapters/Out/Persistence)
+    ↓
+MongoDB Atlas
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## 📡 Endpoints API
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Base URL
+```
+http://localhost:8081/api/v1/users
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### CRUD Principal
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/v1/users` | Listar todos los usuarios |
+| `GET` | `/api/v1/users/{id}` | Obtener usuario por ID |
+| `GET` | `/api/v1/users/status/{status}` | Filtrar por estado (ACTIVE/INACTIVE) |
+| `POST` | `/api/v1/users/create` | Crear un nuevo usuario |
+| `PUT` | `/api/v1/users/update/{id}` | Actualizar usuario |
+| `PATCH` | `/api/v1/users/deactivate/{id}` | Desactivar usuario (INACTIVE) |
+| `PATCH` | `/api/v1/users/restore/{id}` | Restaurar usuario (ACTIVE) |
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+---
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## 📝 Ejemplos de Request/Response
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Crear Usuario
+**Request:**
+```http
+POST /api/v1/users/create
+Content-Type: application/json
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+{
+  "firstName": "María",
+  "lastName": "López Gómez",
+  "documentType": "DNI",
+  "documentNumber": "23456789",
+  "phone": "987654321",
+  "email": "maria.lopez@gmail.com",
+  "username": "maria.lopez@caritas.org.pe",
+  "password": "123456",
+  "role": "COORDINADOR",
+  "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+  "profileImagePath": "uploads/users/profile.jpg"
+}
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario creado exitosamente",
+  "data": {
+    "userId": "68fda092d832a694a0c77a88",
+    "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+    "firstName": "María",
+    "lastName": "López Gómez",
+    "documentType": "DNI",
+    "documentNumber": "23456789",
+    "phone": "987654321",
+    "email": "maria.lopez@gmail.com",
+    "username": "maria.lopez@caritas.org.pe",
+    "role": "COORDINADOR",
+    "profileImagePath": "uploads/users/profile.jpg",
+    "status": "ACTIVE",
+    "createdAt": "2026-05-10T10:00:00",
+    "updatedAt": "2026-05-10T10:00:00"
+  }
+}
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Listar Todos los Usuarios
+**Request:**
+```http
+GET /api/v1/users
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuarios obtenidos",
+  "data": [
+    {
+      "userId": "68fda092d832a694a0c77a88",
+      "firstName": "María",
+      "lastName": "López Gómez",
+      "email": "maria.lopez@gmail.com",
+      "role": "COORDINADOR",
+      "status": "ACTIVE",
+      "createdAt": "2026-05-10T10:00:00"
+    }
+  ]
+}
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Obtener Usuario por ID
+**Request:**
+```http
+GET /api/v1/users/68fda092d832a694a0c77a88
+```
 
-## License
-For open source projects, say how it is licensed.
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario encontrado",
+  "data": {
+    "userId": "68fda092d832a694a0c77a88",
+    "firstName": "María",
+    "lastName": "López Gómez",
+    "documentType": "DNI",
+    "documentNumber": "23456789",
+    "phone": "987654321",
+    "email": "maria.lopez@gmail.com",
+    "username": "maria.lopez@caritas.org.pe",
+    "role": "COORDINADOR",
+    "profileImagePath": "uploads/users/profile.jpg",
+    "status": "ACTIVE",
+    "createdAt": "2026-05-10T10:00:00",
+    "updatedAt": "2026-05-10T10:00:00"
+  }
+}
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### Actualizar Usuario
+**Request:**
+```http
+PUT /api/v1/users/update/68fda092d832a694a0c77a88
+Content-Type: application/json
+
+{
+  "firstName": "María Editada",
+  "phone": "999888777",
+  "role": "ADMIN",
+  "profileImagePath": "uploads/users/nueva-foto.jpg"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario actualizado exitosamente",
+  "data": {
+    "userId": "68fda092d832a694a0c77a88",
+    "firstName": "María Editada",
+    "phone": "999888777",
+    "role": "ADMIN",
+    "profileImagePath": "uploads/users/nueva-foto.jpg",
+    "updatedAt": "2026-05-10T11:00:00"
+  }
+}
+```
+
+### Desactivar Usuario
+**Request:**
+```http
+PATCH /api/v1/users/deactivate/68fda092d832a694a0c77a88
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario desactivado",
+  "data": null
+}
+```
+
+### Restaurar Usuario
+**Request:**
+```http
+PATCH /api/v1/users/restore/68fda092d832a694a0c77a88
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuario restaurado",
+  "data": null
+}
+```
+
+### Filtrar por Estado
+**Request:**
+```http
+GET /api/v1/users/status/ACTIVE
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Usuarios filtrados por estado",
+  "data": [
+    {
+      "userId": "68fda092d832a694a0c77a88",
+      "firstName": "María",
+      "status": "ACTIVE"
+    }
+  ]
+}
+```
+
+---
+
+## ⚠️ Manejo de Errores
+
+### Usuario no encontrado (404)
+```json
+{
+  "code": "NOT_FOUND",
+  "message": "Users con id '68fda092d832a694a0c77a88' no encontrado",
+  "timestamp": "2026-05-10T10:00:00"
+}
+```
+
+### Email o documento duplicado (400)
+```json
+{
+  "code": "EMAIL_EXISTS",
+  "message": "El email ya está registrado",
+  "timestamp": "2026-05-10T10:00:00"
+}
+```
+
+### Error de validación (400)
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "email: Formato de email inválido, documentNumber: El número de documento es obligatorio",
+  "timestamp": "2026-05-10T10:00:00"
+}
+```
+
+---
+
+## 🗄️ Modelo de Datos MongoDB
+
+### Colección: `users`
+
+```json
+{
+  "_id": "68fda092d832a694a0c77a88",
+  "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+  "firstName": "María",
+  "lastName": "López Gómez",
+  "documentType": "DNI",
+  "documentNumber": "23456789",
+  "phone": "987654321",
+  "email": "maria.lopez@gmail.com",
+  "username": "maria.lopez@caritas.org.pe",
+  "password": "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+  "role": "COORDINADOR",
+  "profileImagePath": "uploads/users/68fda092d832a694a0c77a88/profile.jpg",
+  "lastLogin": "2026-05-10T08:30:00",
+  "status": "ACTIVE",
+  "createdAt": "2025-10-07T10:00:00",
+  "updatedAt": "2026-05-10T08:30:00"
+}
+```
+
+### Índices
+
+```javascript
+db.users.createIndex({ "email": 1 }, { unique: true })
+db.users.createIndex({ "username": 1 }, { unique: true })
+db.users.createIndex({ "documentNumber": 1 }, { unique: true })
+db.users.createIndex({ "firebaseId": 1 }, { unique: true, sparse: true })
+db.users.createIndex({ "status": 1 })
+db.users.createIndex({ "role": 1 })
+```
+
+### Roles disponibles
+
+| Rol | Descripción |
+|-----|-------------|
+| `ADMIN` | Administrador del sistema |
+| `COORDINADOR` | Coordinador de área |
+| `VOLUNTARIO` | Voluntario |
+
+### Estados disponibles
+
+| Estado | Descripción |
+|--------|-------------|
+| `ACTIVE` | Usuario activo |
+| `INACTIVE` | Usuario desactivado |
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| Java | 17 | Lenguaje principal |
+| Spring Boot | 3.5.x | Framework base |
+| Spring WebFlux | 3.5.x | Programación reactiva |
+| Spring Data MongoDB Reactive | 3.5.x | Acceso reactivo a MongoDB |
+| MongoDB Atlas | 7.0 | Base de datos en la nube |
+| Lombok | Latest | Reducción de boilerplate |
+| SpringDoc OpenAPI | 2.8.8 | Documentación Swagger |
+| Maven | 3.x | Gestión de dependencias |
+
+---
+
+## 🚀 Ejecución del Proyecto
+
+### Prerrequisitos
+- Java 17+
+- Maven 3.x
+- Docker Desktop (opcional)
+- Cuenta en MongoDB Atlas
+
+### Correr localmente
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/vallegrande/vg-ms-users.git
+cd vg-ms-users
+
+# Compilar
+./mvnw clean compile
+
+# Ejecutar
+./mvnw spring-boot:run
+```
+
+---
+
+## 📖 Documentación Swagger
+
+| Recurso | URL |
+|---------|-----|
+| Swagger UI | http://localhost:8081/swagger-ui.html |
+| OpenAPI JSON | http://localhost:8081/api-docs |
+
+---
+
+## 👥 Equipo
+
+**Institución:** Vallegrande - SIGRC  
+**Versión:** 1.0.0  
+**Equipo:** Cáritas
