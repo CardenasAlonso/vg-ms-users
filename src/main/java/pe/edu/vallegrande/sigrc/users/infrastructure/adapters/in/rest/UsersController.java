@@ -17,7 +17,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/users")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+@RequestMapping("/api/v1/users")
 public class UsersController {
     private final ICreateUsersUseCase createUseCase;
     private final IGetUsersUseCase getUseCase;
