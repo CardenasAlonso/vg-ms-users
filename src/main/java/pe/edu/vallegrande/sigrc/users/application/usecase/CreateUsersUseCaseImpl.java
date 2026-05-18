@@ -1,6 +1,8 @@
 package pe.edu.vallegrande.sigrc.users.application.usecase;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.edu.vallegrande.sigrc.users.application.dto.request.CreateUsersRequest;
 import pe.edu.vallegrande.sigrc.users.application.dto.response.UsersResponse;
 import pe.edu.vallegrande.sigrc.users.application.mappers.UsersMapper;
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
     private final IUsersRepository repository;
 
     @Override
@@ -40,8 +44,7 @@ public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
                             .phone(request.getPhone())
                             .email(request.getEmail())
                             .username(request.getUsername())
-                            .password(request.getPassword()) // ⚠️ encriptar antes en producción
-                            .role(request.getRole())
+                            .password(PASSWORD_ENCODER.encode(request.getPassword()))
                             .profileImagePath(request.getProfileImagePath())
                             .status("ACTIVE")
                             .createdAt(LocalDateTime.now())

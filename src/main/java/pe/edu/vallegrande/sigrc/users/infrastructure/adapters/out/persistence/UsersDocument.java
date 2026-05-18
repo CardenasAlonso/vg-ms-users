@@ -34,7 +34,6 @@ public class UsersDocument {
     private String username;
 
     private String password;
-    private String role;
     private String profileImagePath;
     private LocalDateTime lastLogin;
     private String status;

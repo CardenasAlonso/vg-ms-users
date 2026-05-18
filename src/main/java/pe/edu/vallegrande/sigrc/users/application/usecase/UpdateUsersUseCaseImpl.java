@@ -1,6 +1,8 @@
 package pe.edu.vallegrande.sigrc.users.application.usecase;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.edu.vallegrande.sigrc.users.application.dto.request.UpdateUsersRequest;
 import pe.edu.vallegrande.sigrc.users.application.dto.response.UsersResponse;
 import pe.edu.vallegrande.sigrc.users.application.mappers.UsersMapper;
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
     private final IUsersRepository repository;
 
     @Override
@@ -26,10 +30,9 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                     if (request.getEmail() != null) users.setEmail(request.getEmail());
                     if (request.getDocumentType() != null) users.setDocumentType(request.getDocumentType());
                     if (request.getDocumentNumber() != null) users.setDocumentNumber(request.getDocumentNumber());
-                    if (request.getRole() != null) users.setRole(request.getRole());
                     if (request.getProfileImagePath() != null) users.setProfileImagePath(request.getProfileImagePath());
                     if (request.getFirebaseId() != null) users.setFirebaseId(request.getFirebaseId());
-                    if (request.getPassword() != null) users.setPassword(request.getPassword());
+                    if (request.getPassword() != null) users.setPassword(PASSWORD_ENCODER.encode(request.getPassword()));
                     users.setUpdatedAt(LocalDateTime.now());
                     return repository.save(users);
                 })

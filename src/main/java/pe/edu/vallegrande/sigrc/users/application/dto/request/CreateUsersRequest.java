@@ -15,7 +15,7 @@ public class CreateUsersRequest {
     private String lastName;
 
     @NotBlank(message = "El tipo de documento es obligatorio")
-    @Pattern(regexp = "DNI|CE|PASAPORTE", message = "Tipo de documento inválido")
+    @Pattern(regexp = "DNI|CNE", message = "Tipo de documento inválido")
     private String documentType;
 
     @NotBlank(message = "El número de documento es obligatorio")
@@ -35,10 +35,6 @@ public class CreateUsersRequest {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
     private String password;
-
-    @NotBlank(message = "El rol es obligatorio")
-    @Pattern(regexp = "ADMIN|COORDINADOR|VOLUNTARIO", message = "Rol inválido")
-    private String role;
 
     private String firebaseId;
     private String profileImagePath;

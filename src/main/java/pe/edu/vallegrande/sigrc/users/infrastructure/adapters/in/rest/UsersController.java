@@ -1,5 +1,6 @@
 package pe.edu.vallegrande.sigrc.users.infrastructure.adapters.in.rest;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/users")
+@Tag(name = "Users", description = "Operaciones para gestion de usuarios")
 public class UsersController {
     private final ICreateUsersUseCase createUseCase;
     private final IGetUsersUseCase getUseCase;

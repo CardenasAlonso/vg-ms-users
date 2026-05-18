@@ -14,13 +14,10 @@ public class UpdateUsersRequest {
     @Email(message = "Formato de email inválido")
     private String email;
 
-    @Pattern(regexp = "DNI|CE|PASAPORTE", message = "Tipo de documento inválido")
+    @Pattern(regexp = "DNI|CNE", message = "Tipo de documento inválido")
     private String documentType;
 
     private String documentNumber;
-
-    @Pattern(regexp = "ADMIN|COORDINADOR|VOLUNTARIO", message = "Rol inválido")
-    private String role;
 
     private String profileImagePath;
     private String firebaseId;

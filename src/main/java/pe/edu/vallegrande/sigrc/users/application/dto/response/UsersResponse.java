@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -17,7 +18,7 @@ public class UsersResponse {
     private String phone;
     private String email;
     private String username;
-    private String role;
+    private List<String> roles;
     private String profileImagePath;
     private LocalDateTime lastLogin;
     private String status;
