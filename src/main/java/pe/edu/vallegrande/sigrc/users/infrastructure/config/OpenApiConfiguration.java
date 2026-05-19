@@ -44,6 +44,7 @@ public class OpenApiConfiguration {
                                 - `GET    /api/v1/user-roles/user/{userId}`       - Rol asignado a un usuario
                                 - `GET    /api/v1/user-roles/role/{roleId}`       - Usuarios asignados a un rol
                                 - `POST   /api/v1/user-roles/assign`              - Asignar rol a usuario
+                                - `PUT    /api/v1/user-roles/update`              - Cambiar rol asignado a un usuario
                                 - `DELETE /api/v1/user-roles/revoke/{userId}/{roleId}` - Revocar rol de usuario
                                 """)
                         .contact(new Contact()

@@ -86,4 +86,12 @@ public class BeanConfiguration {
             IUserRolesRepository userRolesRepository) {
         return new RevokeRoleUseCaseImpl(usersRepository, rolesRepository, userRolesRepository);
     }
+
+    @Bean
+    public IUpdateUserRoleUseCase updateUserRoleUseCase(
+            IUsersRepository usersRepository,
+            IRolesRepository rolesRepository,
+            IUserRolesRepository userRolesRepository) {
+        return new UpdateUserRoleUseCaseImpl(usersRepository, rolesRepository, userRolesRepository);
+    }
 }

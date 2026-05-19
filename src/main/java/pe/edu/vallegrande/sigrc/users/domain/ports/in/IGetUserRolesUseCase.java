@@ -8,4 +8,5 @@ public interface IGetUserRolesUseCase {
     Mono<UserWithRolesResponse> getByUserId(String userId);
     Flux<UserWithRolesResponse> getByRoleId(String roleId);
     Flux<UserWithRolesResponse> getUnassignedUsers();
+    Flux<UserWithRolesResponse> getAllUsersWithRoles();
 }

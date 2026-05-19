@@ -45,6 +45,12 @@ public class GetUserRolesUseCaseImpl implements IGetUserRolesUseCase {
                         .map(ignored -> UserRolesMapper.toUserWithRolesResponse(users, List.of())));
     }
 
+    @Override
+    public Flux<UserWithRolesResponse> getAllUsersWithRoles() {
+        return usersRepository.findAll()
+                .flatMap(this::withRoles);
+    }
+
     private Mono<UserWithRolesResponse> withRoles(Users users) {
         return roleNamesByUserId(users.getUserId())
                 .map(roleNames -> UserRolesMapper.toUserWithRolesResponse(users, roleNames));
