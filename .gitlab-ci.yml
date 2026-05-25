@@ -1,0 +1,29 @@
+image: docker:cli
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - publish
+
+build-and-push-docker:
+  stage: publish
+  rules:
+    # Se ejecutará automáticamente cuando hagas push a 'develop' o 'main'
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+  
+  before_script:
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  
+  script:
+    # Construir la imagen para el microservicio ms-users
+    - docker build -t $DOCKERHUB_USERNAME/ms-users:latest -t $DOCKERHUB_USERNAME/ms-users:$CI_COMMIT_SHORT_SHA .
+    
+    # Subir las imágenes a Docker Hub
+    - docker push $DOCKERHUB_USERNAME/ms-users:latest
+    - docker push $DOCKERHUB_USERNAME/ms-users:$CI_COMMIT_SHORT_SHA
