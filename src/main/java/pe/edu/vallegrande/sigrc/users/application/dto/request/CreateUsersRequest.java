@@ -19,7 +19,6 @@ public class CreateUsersRequest {
     private String documentType;
 
     @NotBlank(message = "El número de documento es obligatorio")
-    @Size(min = 8, max = 12, message = "Número de documento inválido")
     private String documentNumber;
 
     @NotBlank(message = "El teléfono es obligatorio")

@@ -17,11 +17,18 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+    private static final String DNI_PATTERN = "\\d{8}";
+    private static final String CNE_PATTERN = "\\d{20}";
 
     private final IUsersRepository repository;
 
     @Override
     public Mono<UsersResponse> create(CreateUsersRequest request) {
+        String documentError = validateDocumentNumber(request.getDocumentType(), request.getDocumentNumber());
+        if (documentError != null) {
+            return Mono.error(new DomainException("INVALID_DOCUMENT_NUMBER", documentError));
+        }
+
         return repository.existsByEmail(request.getEmail())
                 .flatMap(emailExists -> {
                     if (emailExists) {
@@ -53,5 +60,17 @@ public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
                     return repository.save(users);
                 })
                 .map(UsersMapper::toResponse);
+    }
+
+    private String validateDocumentNumber(String documentType, String documentNumber) {
+        if (documentType == null || documentNumber == null) {
+            return null;
+        }
+
+        return switch (documentType) {
+            case "DNI" -> documentNumber.matches(DNI_PATTERN) ? null : "El DNI debe tener 8 dígitos";
+            case "CNE" -> documentNumber.matches(CNE_PATTERN) ? null : "El CNE debe tener 20 dígitos";
+            default -> null;
+        };
     }
 }
