@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pe.edu.vallegrande.sigrc.users.domain.model.UserRole;
 
 @Data
 @Builder
@@ -35,6 +36,7 @@ public class UsersDocument {
 
     private String password;
     private String profileImagePath;
+    private UserRole role;
     private LocalDateTime lastLogin;
     private String status;
     private LocalDateTime createdAt;

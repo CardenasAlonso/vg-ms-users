@@ -2,9 +2,9 @@ package pe.edu.vallegrande.sigrc.users.application.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
+import pe.edu.vallegrande.sigrc.users.domain.model.UserRole;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -18,7 +18,7 @@ public class UsersResponse {
     private String phone;
     private String email;
     private String username;
-    private List<String> roles;
+    private UserRole role;
     private String profileImagePath;
     private LocalDateTime lastLogin;
     private String status;

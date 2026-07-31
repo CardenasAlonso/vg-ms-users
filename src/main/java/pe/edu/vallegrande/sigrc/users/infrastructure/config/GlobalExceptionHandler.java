@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import pe.edu.vallegrande.sigrc.users.application.dto.common.ErrorResponse;
 import pe.edu.vallegrande.sigrc.users.domain.exceptions.DomainException;
+import pe.edu.vallegrande.sigrc.users.domain.exceptions.KeycloakIntegrationException;
+import pe.edu.vallegrande.sigrc.users.domain.exceptions.KeycloakRoleNotFoundException;
+import pe.edu.vallegrande.sigrc.users.domain.exceptions.KeycloakUserAlreadyExistsException;
 import pe.edu.vallegrande.sigrc.users.domain.exceptions.NotFoundException;
 import reactor.core.publisher.Mono;
 
@@ -23,6 +26,39 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.builder()
                         .code(ex.getCode())
                         .message(ex.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build()));
+    }
+
+    // 409 - Usuario duplicado en Keycloak
+    @ExceptionHandler(KeycloakUserAlreadyExistsException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleKeycloakConflict(KeycloakUserAlreadyExistsException ex) {
+        return Mono.just(ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build()));
+    }
+
+    // 400 - Rol inexistente en Keycloak
+    @ExceptionHandler(KeycloakRoleNotFoundException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleKeycloakRoleNotFound(KeycloakRoleNotFoundException ex) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .timestamp(LocalDateTime.now())
+                        .build()));
+    }
+
+    // 503 - Servicio de autenticación no disponible
+    @ExceptionHandler(KeycloakIntegrationException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleKeycloakIntegration(KeycloakIntegrationException ex) {
+        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message("Servicio de autenticación no disponible, intente más tarde")
                         .timestamp(LocalDateTime.now())
                         .build()));
     }

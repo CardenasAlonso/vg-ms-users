@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -25,7 +24,7 @@ public class Users {
     private String username;
     private String password;
     private String profileImagePath;
-    private List<String> roles;
+    private UserRole role;
     private LocalDateTime lastLogin;
     private String status;         // ACTIVE, INACTIVE
     private LocalDateTime createdAt;

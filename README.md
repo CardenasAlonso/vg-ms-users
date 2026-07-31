@@ -160,7 +160,7 @@ Content-Type: application/json
   "email": "maria.lopez@gmail.com",
   "username": "maria.lopez@caritas.org.pe",
   "password": "123456",
-  "role": "COORDINADOR",
+  "role": "admin",
   "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
   "profileImagePath": "uploads/users/profile.jpg"
 }
@@ -181,7 +181,7 @@ Content-Type: application/json
     "phone": "987654321",
     "email": "maria.lopez@gmail.com",
     "username": "maria.lopez@caritas.org.pe",
-    "role": "COORDINADOR",
+    "role": "admin",
     "profileImagePath": "uploads/users/profile.jpg",
     "status": "ACTIVE",
     "createdAt": "2026-05-10T10:00:00",
@@ -207,7 +207,7 @@ GET /api/v1/users
       "firstName": "María",
       "lastName": "López Gómez",
       "email": "maria.lopez@gmail.com",
-      "role": "COORDINADOR",
+      "role": "admin",
       "status": "ACTIVE",
       "createdAt": "2026-05-10T10:00:00"
     }
@@ -235,7 +235,7 @@ GET /api/v1/users/68fda092d832a694a0c77a88
     "phone": "987654321",
     "email": "maria.lopez@gmail.com",
     "username": "maria.lopez@caritas.org.pe",
-    "role": "COORDINADOR",
+    "role": "admin",
     "profileImagePath": "uploads/users/profile.jpg",
     "status": "ACTIVE",
     "createdAt": "2026-05-10T10:00:00",
@@ -253,7 +253,7 @@ Content-Type: application/json
 {
   "firstName": "María Editada",
   "phone": "999888777",
-  "role": "ADMIN",
+  "role": "doctor",
   "profileImagePath": "uploads/users/nueva-foto.jpg"
 }
 ```
@@ -267,7 +267,7 @@ Content-Type: application/json
     "userId": "68fda092d832a694a0c77a88",
     "firstName": "María Editada",
     "phone": "999888777",
-    "role": "ADMIN",
+    "role": "doctor",
     "profileImagePath": "uploads/users/nueva-foto.jpg",
     "updatedAt": "2026-05-10T11:00:00"
   }
@@ -374,7 +374,7 @@ GET /api/v1/users/status/ACTIVE
   "email": "maria.lopez@gmail.com",
   "username": "maria.lopez@caritas.org.pe",
   "password": "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
-  "role": "COORDINADOR",
+  "role": "admin",
   "profileImagePath": "uploads/users/68fda092d832a694a0c77a88/profile.jpg",
   "lastLogin": "2026-05-10T08:30:00",
   "status": "ACTIVE",
@@ -398,9 +398,11 @@ db.users.createIndex({ "role": 1 })
 
 | Rol | Descripción |
 |-----|-------------|
-| `ADMIN` | Administrador del sistema |
-| `COORDINADOR` | Coordinador de área |
-| `VOLUNTARIO` | Voluntario |
+| `Buyer` | Realm Role de Keycloak |
+| `Cashier` | Realm Role de Keycloak |
+| `admin` | Realm Role de Keycloak |
+| `doctor` | Realm Role de Keycloak |
+| `user` | Realm Role de Keycloak |
 
 ### Estados disponibles
 

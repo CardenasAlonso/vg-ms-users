@@ -21,6 +21,13 @@ springdoc:
     enabled: true
     url: /api-docs
 
+keycloak:
+  admin:
+    base-url: ${KEYCLOAK_BASE_URL:https://lab.vallegrande.edu.pe/sigrc/keycloak}
+    realm: ${KEYCLOAK_REALM:PRS04}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:sigrc-gateway}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+
 logging:
   level:
     pe.edu.vallegrande.sigrc: DEBUG

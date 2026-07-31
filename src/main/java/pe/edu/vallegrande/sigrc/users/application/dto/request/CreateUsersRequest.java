@@ -2,9 +2,11 @@ package pe.edu.vallegrande.sigrc.users.application.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import pe.edu.vallegrande.sigrc.users.domain.model.UserRole;
 
 @Data
 public class CreateUsersRequest {
@@ -37,4 +39,7 @@ public class CreateUsersRequest {
 
     private String keycloakId;
     private String profileImagePath;
+
+    @NotNull(message = "El rol es obligatorio")
+    private UserRole role;
 }
