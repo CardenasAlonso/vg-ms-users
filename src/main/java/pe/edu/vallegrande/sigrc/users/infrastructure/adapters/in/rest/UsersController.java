@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.vallegrande.sigrc.users.application.dto.common.ApiResponse;
 import pe.edu.vallegrande.sigrc.users.application.dto.request.CreateUsersRequest;
@@ -29,6 +30,7 @@ public class UsersController {
 
     // GET /api/v1/users
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<List<UsersResponse>>> getAll() {
         return getUseCase.getAll()
                 .collectList()
@@ -37,6 +39,7 @@ public class UsersController {
 
     // GET /api/v1/users/{id}
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<UsersResponse>> getById(@PathVariable String id) {
         return getUseCase.getById(id)
                 .map(user -> ApiResponse.ok("Usuario encontrado", user));
@@ -44,6 +47,7 @@ public class UsersController {
 
     // GET /api/v1/users/status/{status}
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<List<UsersResponse>>> getByStatus(@PathVariable String status) {
         return getUseCase.getByStatus(status)
                 .collectList()
@@ -52,6 +56,7 @@ public class UsersController {
 
     // POST /api/v1/users/create
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ApiResponse<UsersResponse>> create(@Valid @RequestBody CreateUsersRequest request) {
         return createUseCase.create(request)
@@ -60,6 +65,7 @@ public class UsersController {
 
     // PUT /api/v1/users/update/{id}
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<UsersResponse>> update(
             @PathVariable String id,
             @Valid @RequestBody UpdateUsersRequest request) {
@@ -69,6 +75,7 @@ public class UsersController {
 
     // PATCH /api/v1/users/deactivate/{id}
     @PatchMapping("/deactivate/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<Void>> deactivate(@PathVariable String id) {
         return deactivateUseCase.deactivate(id)
                 .then(Mono.just(ApiResponse.ok("Usuario desactivado", null)));
@@ -76,6 +83,7 @@ public class UsersController {
 
     // PATCH /api/v1/users/restore/{id}
     @PatchMapping("/restore/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ApiResponse<Void>> restore(@PathVariable String id) {
         return restoreUseCase.restore(id)
                 .then(Mono.just(ApiResponse.ok("Usuario restaurado", null)));
