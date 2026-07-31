@@ -43,7 +43,7 @@ public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
                                 "El número de documento ya está registrado"));
                     }
                     Users users = Users.builder()
-                            .firebaseId(request.getFirebaseId())
+                            .keycloakId(request.getKeycloakId())
                             .firstName(request.getFirstName())
                             .lastName(request.getLastName())
                             .documentType(request.getDocumentType())

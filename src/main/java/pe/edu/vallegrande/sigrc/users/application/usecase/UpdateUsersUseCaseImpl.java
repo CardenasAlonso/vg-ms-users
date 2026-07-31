@@ -34,7 +34,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                     if (request.getDocumentType() != null) users.setDocumentType(request.getDocumentType());
                     if (request.getDocumentNumber() != null) users.setDocumentNumber(request.getDocumentNumber());
                     if (request.getProfileImagePath() != null) users.setProfileImagePath(request.getProfileImagePath());
-                    if (request.getFirebaseId() != null) users.setFirebaseId(request.getFirebaseId());
+                    if (request.getKeycloakId() != null) users.setKeycloakId(request.getKeycloakId());
                     if (request.getPassword() != null) users.setPassword(PASSWORD_ENCODER.encode(request.getPassword()));
 
                     String documentError = validateDocumentNumber(users.getDocumentType(), users.getDocumentNumber());

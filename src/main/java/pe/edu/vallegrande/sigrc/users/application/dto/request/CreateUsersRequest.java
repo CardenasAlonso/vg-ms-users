@@ -35,6 +35,6 @@ public class CreateUsersRequest {
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
     private String password;
 
-    private String firebaseId;
+    private String keycloakId;
     private String profileImagePath;
 }

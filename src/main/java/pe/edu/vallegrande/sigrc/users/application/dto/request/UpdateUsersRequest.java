@@ -20,7 +20,7 @@ public class UpdateUsersRequest {
     private String documentNumber;
 
     private String profileImagePath;
-    private String firebaseId;
+    private String keycloakId;
 
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
     private String password;

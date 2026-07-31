@@ -20,7 +20,7 @@ public class UsersDocument {
     @Id
     private String id;
 
-    private String firebaseId;
+    private String keycloakId;
     private String firstName;
     private String lastName;
     private String documentType;

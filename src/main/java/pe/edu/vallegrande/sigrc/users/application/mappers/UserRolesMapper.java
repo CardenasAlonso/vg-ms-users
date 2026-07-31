@@ -33,7 +33,7 @@ public class UserRolesMapper {
     public static UserWithRolesResponse toUserWithRolesResponse(Users users, List<String> roles) {
         return UserWithRolesResponse.builder()
                 .userId(users.getUserId())
-                .firebaseId(users.getFirebaseId())
+                .keycloakId(users.getKeycloakId())
                 .firstName(users.getFirstName())
                 .lastName(users.getLastName())
                 .documentType(users.getDocumentType())

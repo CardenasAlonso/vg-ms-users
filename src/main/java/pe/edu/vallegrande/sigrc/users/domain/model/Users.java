@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Users {
     private String userId;
-    private String firebaseId;
+    private String keycloakId;
     private String firstName;
     private String lastName;
     private String documentType;   // DNI, CNE

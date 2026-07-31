@@ -161,7 +161,7 @@ Content-Type: application/json
   "username": "maria.lopez@caritas.org.pe",
   "password": "123456",
   "role": "COORDINADOR",
-  "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+  "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
   "profileImagePath": "uploads/users/profile.jpg"
 }
 ```
@@ -173,7 +173,7 @@ Content-Type: application/json
   "message": "Usuario creado exitosamente",
   "data": {
     "userId": "68fda092d832a694a0c77a88",
-    "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+    "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
     "firstName": "María",
     "lastName": "López Gómez",
     "documentType": "DNI",
@@ -365,7 +365,7 @@ GET /api/v1/users/status/ACTIVE
 ```json
 {
   "_id": "68fda092d832a694a0c77a88",
-  "firebaseId": "kR9mP2xL5nQ8wT4vY7zA",
+  "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
   "firstName": "María",
   "lastName": "López Gómez",
   "documentType": "DNI",
@@ -389,7 +389,7 @@ GET /api/v1/users/status/ACTIVE
 db.users.createIndex({ "email": 1 }, { unique: true })
 db.users.createIndex({ "username": 1 }, { unique: true })
 db.users.createIndex({ "documentNumber": 1 }, { unique: true })
-db.users.createIndex({ "firebaseId": 1 }, { unique: true, sparse: true })
+db.users.createIndex({ "keycloakId": 1 }, { unique: true, sparse: true })
 db.users.createIndex({ "status": 1 })
 db.users.createIndex({ "role": 1 })
 ```

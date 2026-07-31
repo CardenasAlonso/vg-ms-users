@@ -12,7 +12,7 @@ public class UsersMapper {
     public static UsersResponse toResponse(Users users) {
         return UsersResponse.builder()
                 .userId(users.getUserId())
-                .firebaseId(users.getFirebaseId())
+                .keycloakId(users.getKeycloakId())
                 .firstName(users.getFirstName())
                 .lastName(users.getLastName())
                 .documentType(users.getDocumentType())
@@ -33,7 +33,7 @@ public class UsersMapper {
     public static Users toDomain(UsersDocument doc) {
         return Users.builder()
                 .userId(doc.getId())
-                .firebaseId(doc.getFirebaseId())
+                .keycloakId(doc.getKeycloakId())
                 .firstName(doc.getFirstName())
                 .lastName(doc.getLastName())
                 .documentType(doc.getDocumentType())
@@ -54,7 +54,7 @@ public class UsersMapper {
     public static UsersDocument toDocument(Users users) {
         return UsersDocument.builder()
                 .id(users.getUserId())
-                .firebaseId(users.getFirebaseId())
+                .keycloakId(users.getKeycloakId())
                 .firstName(users.getFirstName())
                 .lastName(users.getLastName())
                 .documentType(users.getDocumentType())
