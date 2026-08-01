@@ -22,6 +22,8 @@ public interface IKeycloakAdminService {
 
     Mono<Void> setUserEnabled(String keycloakUserId, boolean enabled);
 
+    Mono<Void> resetUserPassword(String keycloakUserId, String newPassword);
+
     Mono<Void> updateUserInKeycloak(
             String keycloakUserId,
             String firstName,

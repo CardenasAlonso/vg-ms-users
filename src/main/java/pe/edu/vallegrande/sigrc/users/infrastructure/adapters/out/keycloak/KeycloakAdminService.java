@@ -145,6 +145,28 @@ public class KeycloakAdminService implements IKeycloakAdminService {
     }
 
     @Override
+    public Mono<Void> resetUserPassword(String keycloakUserId, String newPassword) {
+        return getServiceAccountToken()
+                .flatMap(token -> webClientBuilder.build()
+                        .put()
+                        .uri(userResetPasswordUri(keycloakUserId))
+                        .headers(headers -> headers.setBearerAuth(token))
+                        .bodyValue(Map.of(
+                                "type", "password",
+                                "value", newPassword,
+                                "temporary", false
+                        ))
+                        .exchangeToMono(response -> handleEmptyResponse(
+                                response.statusCode().is2xxSuccessful(),
+                                response.statusCode().value(),
+                                response.bodyToMono(String.class),
+                                "Error actualizando contraseña de usuario en Keycloak")))
+                .onErrorMap(ex -> !(ex instanceof DomainException),
+                        ex -> new KeycloakIntegrationException(
+                                "Servicio de autenticación no disponible, intente más tarde"));
+    }
+
+    @Override
     public Mono<Void> updateUserInKeycloak(
             String keycloakUserId,
             String firstName,
@@ -236,6 +258,10 @@ public class KeycloakAdminService implements IKeycloakAdminService {
 
     private String userRealmRoleMappingsUri(String keycloakUserId) {
         return userUri(keycloakUserId) + "/role-mappings/realm";
+    }
+
+    private String userResetPasswordUri(String keycloakUserId) {
+        return userUri(keycloakUserId) + "/reset-password";
     }
 
     private Map<String, Object> userBody(

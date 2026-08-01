@@ -35,6 +35,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                 .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
                 .flatMap(users -> {
                     Users updatedUsers = applyUpdates(users, request);
+                    String keycloakId = users.getKeycloakId();
 
                     String documentError = validateDocumentNumber(
                             updatedUsers.getDocumentType(),
@@ -44,6 +45,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                     }
 
                     return syncKeycloakBeforeUpdate(users, updatedUsers, request)
+                            .then(syncPasswordInKeycloak(keycloakId, updatedUsers, request))
                             .then(Mono.defer(() -> {
                                 updatedUsers.setUpdatedAt(LocalDateTime.now());
                                 return repository.save(updatedUsers)
@@ -59,7 +61,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
     private Users applyUpdates(Users users, UpdateUsersRequest request) {
         Users updatedUsers = Users.builder()
                 .userId(users.getUserId())
-                .keycloakId(request.getKeycloakId() != null ? request.getKeycloakId() : users.getKeycloakId())
+                .keycloakId(users.getKeycloakId())
                 .firstName(request.getFirstName() != null ? request.getFirstName() : users.getFirstName())
                 .lastName(request.getLastName() != null ? request.getLastName() : users.getLastName())
                 .documentType(request.getDocumentType() != null ? request.getDocumentType() : users.getDocumentType())
@@ -67,7 +69,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                 .phone(request.getPhone() != null ? request.getPhone() : users.getPhone())
                 .email(request.getEmail() != null ? request.getEmail() : users.getEmail())
                 .username(request.getUsername() != null ? request.getUsername() : users.getUsername())
-                .password(request.getPassword() != null ? PASSWORD_ENCODER.encode(request.getPassword()) : users.getPassword())
+                .password(users.getPassword())
                 .profileImagePath(request.getProfileImagePath() != null ? request.getProfileImagePath() : users.getProfileImagePath())
                 .role(request.getRole() != null ? request.getRole() : users.getRole())
                 .lastLogin(users.getLastLogin())
@@ -101,8 +103,7 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
             Users updatedUsers,
             UpdateUsersRequest request) {
         return hasBasicKeycloakChanges(request)
-                || !Objects.equals(currentUsers.getRole(), updatedUsers.getRole())
-                || request.getKeycloakId() != null;
+                || !Objects.equals(currentUsers.getRole(), updatedUsers.getRole());
     }
 
     private boolean hasBasicKeycloakChanges(UpdateUsersRequest request) {
@@ -123,6 +124,27 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                 updatedUsers.getLastName(),
                 updatedUsers.getEmail(),
                 updatedUsers.getUsername());
+    }
+
+    private Mono<Void> syncPasswordInKeycloak(
+            String keycloakId,
+            Users updatedUsers,
+            UpdateUsersRequest request) {
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            return Mono.empty();
+        }
+
+        if (keycloakId == null || keycloakId.isBlank()) {
+            return Mono.error(new DomainException("KEYCLOAK_ID_REQUIRED",
+                    "El usuario no tiene keycloakId para sincronizar con Keycloak"));
+        }
+
+        return keycloakAdminService.resetUserPassword(keycloakId, request.getPassword())
+                .doOnSuccess(unused -> updatedUsers.setPassword(PASSWORD_ENCODER.encode(request.getPassword())))
+                .doOnError(error -> log.error(
+                        "Falló la sincronización de contraseña en Keycloak, keycloakId: {}",
+                        keycloakId,
+                        error));
     }
 
     private Mono<Void> updateRoleInKeycloak(
