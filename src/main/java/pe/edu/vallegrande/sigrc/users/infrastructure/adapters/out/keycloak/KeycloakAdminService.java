@@ -247,6 +247,7 @@ public class KeycloakAdminService implements IKeycloakAdminService {
         return Map.of(
                 "username", username,
                 "email", email,
+                "emailVerified", true,
                 "firstName", firstName,
                 "lastName", lastName,
                 "enabled", true,
