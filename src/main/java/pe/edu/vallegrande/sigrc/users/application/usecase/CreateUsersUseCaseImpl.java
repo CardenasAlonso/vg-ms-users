@@ -1,7 +1,6 @@
 package pe.edu.vallegrande.sigrc.users.application.usecase;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.edu.vallegrande.sigrc.users.application.dto.request.CreateUsersRequest;
@@ -10,13 +9,12 @@ import pe.edu.vallegrande.sigrc.users.application.mappers.UsersMapper;
 import pe.edu.vallegrande.sigrc.users.domain.exceptions.DomainException;
 import pe.edu.vallegrande.sigrc.users.domain.model.Users;
 import pe.edu.vallegrande.sigrc.users.domain.ports.in.ICreateUsersUseCase;
-import pe.edu.vallegrande.sigrc.users.domain.ports.out.IKeycloakAdminService;
+import pe.edu.vallegrande.sigrc.users.domain.ports.out.IAuthServiceClient;
 import pe.edu.vallegrande.sigrc.users.domain.ports.out.IUsersRepository;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-@Slf4j
 @RequiredArgsConstructor
 public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
@@ -24,7 +22,7 @@ public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
     private static final String CNE_PATTERN = "\\d{20}";
 
     private final IUsersRepository repository;
-    private final IKeycloakAdminService keycloakAdminService;
+    private final IAuthServiceClient authServiceClient;
 
     @Override
     public Mono<UsersResponse> create(CreateUsersRequest request) {
@@ -46,34 +44,18 @@ public class CreateUsersUseCaseImpl implements ICreateUsersUseCase {
                         return Mono.error(new DomainException("DOCUMENT_EXISTS",
                                 "El número de documento ya está registrado"));
                     }
-                    return keycloakAdminService.createUserInKeycloak(
-                                    request.getUsername(),
-                                    request.getEmail(),
-                                    request.getFirstName(),
-                                    request.getLastName(),
-                                    request.getPassword())
-                            .flatMap(keycloakId -> {
-                                Users users = buildUser(request, keycloakId);
-                                Mono<Void> assignRole = keycloakAdminService
-                                        .assignRealmRoleToUser(keycloakId, request.getRole().name())
-                                        .doOnError(error -> log.error(
-                                                "Usuario creado en Keycloak pero falló la asignación de rol, keycloakId: {}, requiere limpieza manual",
-                                                keycloakId,
-                                                error));
-                                // Mejora futura: compensar esta inconsistencia eliminando el usuario en Keycloak.
-                                return assignRole.then(repository.save(users)
-                                        .doOnError(error -> log.error(
-                                                        "Usuario creado en Keycloak pero falló el guardado en MongoDB, keycloakId: {}, requiere limpieza manual",
-                                                        keycloakId,
-                                                        error)));
-                            });
+                    return repository.save(buildUser(request));
                 })
+                .flatMap(saved -> authServiceClient.createUser(
+                                saved.getUserId(), saved.getUsername(), saved.getEmail(),
+                                saved.getFirstName(), saved.getLastName(),
+                                request.getPassword(), saved.getRole())
+                        .thenReturn(saved))
                 .map(UsersMapper::toResponse);
     }
 
-    private Users buildUser(CreateUsersRequest request, String keycloakId) {
+    private Users buildUser(CreateUsersRequest request) {
         return Users.builder()
-                .keycloakId(keycloakId)
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .documentType(request.getDocumentType())

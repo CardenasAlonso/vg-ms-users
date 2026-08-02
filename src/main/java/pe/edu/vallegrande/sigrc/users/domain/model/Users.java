@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Users {
     private String userId;
-    private String keycloakId;
     private String firstName;
     private String lastName;
     private String documentType;   // DNI, CNE

@@ -37,7 +37,6 @@ public class CreateUsersRequest {
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
     private String password;
 
-    private String keycloakId;
     private String profileImagePath;
 
     @NotNull(message = "El rol es obligatorio")

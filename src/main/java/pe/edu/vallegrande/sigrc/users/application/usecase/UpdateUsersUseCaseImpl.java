@@ -9,15 +9,13 @@ import pe.edu.vallegrande.sigrc.users.application.dto.response.UsersResponse;
 import pe.edu.vallegrande.sigrc.users.application.mappers.UsersMapper;
 import pe.edu.vallegrande.sigrc.users.domain.exceptions.DomainException;
 import pe.edu.vallegrande.sigrc.users.domain.exceptions.NotFoundException;
-import pe.edu.vallegrande.sigrc.users.domain.model.UserRole;
 import pe.edu.vallegrande.sigrc.users.domain.model.Users;
 import pe.edu.vallegrande.sigrc.users.domain.ports.in.IUpdateUsersUseCase;
-import pe.edu.vallegrande.sigrc.users.domain.ports.out.IKeycloakAdminService;
+import pe.edu.vallegrande.sigrc.users.domain.ports.out.IAuthServiceClient;
 import pe.edu.vallegrande.sigrc.users.domain.ports.out.IUsersRepository;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,15 +25,17 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
     private static final String CNE_PATTERN = "\\d{20}";
 
     private final IUsersRepository repository;
-    private final IKeycloakAdminService keycloakAdminService;
+    private final IAuthServiceClient authServiceClient;
 
     @Override
     public Mono<UsersResponse> update(String id, UpdateUsersRequest request) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
                 .flatMap(users -> {
+                    String currentUsername = users.getUsername();
+                    boolean passwordChanged = request.getPassword() != null && !request.getPassword().isBlank();
+
                     Users updatedUsers = applyUpdates(users, request);
-                    String keycloakId = users.getKeycloakId();
 
                     String documentError = validateDocumentNumber(
                             updatedUsers.getDocumentType(),
@@ -44,16 +44,19 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                         return Mono.error(new DomainException("INVALID_DOCUMENT_NUMBER", documentError));
                     }
 
-                    return syncKeycloakBeforeUpdate(users, updatedUsers, request)
-                            .then(syncPasswordInKeycloak(keycloakId, updatedUsers, request))
-                            .then(Mono.defer(() -> {
-                                updatedUsers.setUpdatedAt(LocalDateTime.now());
-                                return repository.save(updatedUsers)
-                                        .doOnError(error -> log.error(
-                                                "Usuario actualizado en Keycloak pero falló el guardado en MongoDB, keycloakId: {}, requiere revisión manual",
-                                                updatedUsers.getKeycloakId(),
-                                                error));
-                            }));
+                    if (passwordChanged) {
+                        updatedUsers.setPassword(PASSWORD_ENCODER.encode(request.getPassword()));
+                    }
+
+                    updatedUsers.setUpdatedAt(LocalDateTime.now());
+                    return repository.save(updatedUsers)
+                            .flatMap(saved -> authServiceClient.updateUser(
+                                            currentUsername, saved.getUsername(), saved.getEmail(),
+                                            saved.getFirstName(), saved.getLastName(), saved.getRole())
+                                    .then(passwordChanged
+                                            ? authServiceClient.resetPassword(saved.getUsername(), request.getPassword())
+                                            : Mono.empty())
+                                    .thenReturn(saved));
                 })
                 .map(UsersMapper::toResponse);
     }
@@ -61,7 +64,6 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
     private Users applyUpdates(Users users, UpdateUsersRequest request) {
         Users updatedUsers = Users.builder()
                 .userId(users.getUserId())
-                .keycloakId(users.getKeycloakId())
                 .firstName(request.getFirstName() != null ? request.getFirstName() : users.getFirstName())
                 .lastName(request.getLastName() != null ? request.getLastName() : users.getLastName())
                 .documentType(request.getDocumentType() != null ? request.getDocumentType() : users.getDocumentType())
@@ -78,93 +80,6 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                 .updatedAt(users.getUpdatedAt())
                 .build();
         return updatedUsers;
-    }
-
-    private Mono<Void> syncKeycloakBeforeUpdate(
-            Users currentUsers,
-            Users updatedUsers,
-            UpdateUsersRequest request) {
-        if (!hasKeycloakChanges(currentUsers, updatedUsers, request)) {
-            return Mono.empty();
-        }
-
-        String keycloakId = updatedUsers.getKeycloakId();
-        if (keycloakId == null || keycloakId.isBlank()) {
-            return Mono.error(new DomainException("KEYCLOAK_ID_REQUIRED",
-                    "El usuario no tiene keycloakId para sincronizar con Keycloak"));
-        }
-
-        return updateBasicDataInKeycloak(updatedUsers, request)
-                .then(updateRoleInKeycloak(keycloakId, currentUsers.getRole(), updatedUsers.getRole()));
-    }
-
-    private boolean hasKeycloakChanges(
-            Users currentUsers,
-            Users updatedUsers,
-            UpdateUsersRequest request) {
-        return hasBasicKeycloakChanges(request)
-                || !Objects.equals(currentUsers.getRole(), updatedUsers.getRole());
-    }
-
-    private boolean hasBasicKeycloakChanges(UpdateUsersRequest request) {
-        return request.getFirstName() != null
-                || request.getLastName() != null
-                || request.getEmail() != null
-                || request.getUsername() != null;
-    }
-
-    private Mono<Void> updateBasicDataInKeycloak(Users updatedUsers, UpdateUsersRequest request) {
-        if (!hasBasicKeycloakChanges(request)) {
-            return Mono.empty();
-        }
-
-        return keycloakAdminService.updateUserInKeycloak(
-                updatedUsers.getKeycloakId(),
-                updatedUsers.getFirstName(),
-                updatedUsers.getLastName(),
-                updatedUsers.getEmail(),
-                updatedUsers.getUsername());
-    }
-
-    private Mono<Void> syncPasswordInKeycloak(
-            String keycloakId,
-            Users updatedUsers,
-            UpdateUsersRequest request) {
-        if (request.getPassword() == null || request.getPassword().isBlank()) {
-            return Mono.empty();
-        }
-
-        if (keycloakId == null || keycloakId.isBlank()) {
-            return Mono.error(new DomainException("KEYCLOAK_ID_REQUIRED",
-                    "El usuario no tiene keycloakId para sincronizar con Keycloak"));
-        }
-
-        return keycloakAdminService.resetUserPassword(keycloakId, request.getPassword())
-                .doOnSuccess(unused -> updatedUsers.setPassword(PASSWORD_ENCODER.encode(request.getPassword())))
-                .doOnError(error -> log.error(
-                        "Falló la sincronización de contraseña en Keycloak, keycloakId: {}",
-                        keycloakId,
-                        error));
-    }
-
-    private Mono<Void> updateRoleInKeycloak(
-            String keycloakId,
-            UserRole currentRole,
-            UserRole updatedRole) {
-        if (Objects.equals(currentRole, updatedRole)) {
-            return Mono.empty();
-        }
-
-        Mono<Void> removeCurrentRole = currentRole == null
-                ? Mono.empty()
-                : keycloakAdminService.removeRealmRoleFromUser(keycloakId, currentRole.name());
-
-        return removeCurrentRole
-                .then(keycloakAdminService.assignRealmRoleToUser(keycloakId, updatedRole.name()))
-                .doOnError(error -> log.error(
-                        "Falló la sincronización de rol en Keycloak, keycloakId: {}, requiere revisión manual",
-                        keycloakId,
-                        error));
     }
 
     private String validateDocumentNumber(String documentType, String documentNumber) {

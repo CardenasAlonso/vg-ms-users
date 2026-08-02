@@ -18,6 +18,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:https://lab.vallegrande.edu.pe/sigrc/keycloak/realms/PRS04}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:https://lab.vallegrande.edu.pe/sigrc/keycloak/realms/PRS04/protocol/openid-connect/certs}
 
 springdoc:
   api-docs:
@@ -27,14 +28,11 @@ springdoc:
     enabled: true
     url: /api-docs
 
-keycloak:
-  admin:
-    base-url: ${KEYCLOAK_BASE_URL:https://lab.vallegrande.edu.pe/sigrc/keycloak}
-    realm: ${KEYCLOAK_REALM:PRS04}
-    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:sigrc-gateway}
-    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+auth-service:
+  url: ${AUTH_SERVICE_URL:https://lab.vallegrande.edu.pe/sigrc/gateway}
+  internal-api-key: ${AUTH_INTERNAL_API_KEY:sigrc-internal-dev-key}
 
 logging:
   level:
-    pe.edu.vallegrande.sigrc: DEBUG
-    org.springframework.data.mongodb: DEBUG
+    pe.edu.vallegrande.sigrc: INFO
+    org.springframework.data.mongodb: INFO

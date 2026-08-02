@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Builder
 public class UsersResponse {
     private String userId;
-    private String keycloakId;
     private String firstName;
     private String lastName;
     private String documentType;

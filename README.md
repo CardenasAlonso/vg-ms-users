@@ -161,7 +161,6 @@ Content-Type: application/json
   "username": "maria.lopez@caritas.org.pe",
   "password": "123456",
   "role": "admin",
-  "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
   "profileImagePath": "uploads/users/profile.jpg"
 }
 ```
@@ -173,7 +172,6 @@ Content-Type: application/json
   "message": "Usuario creado exitosamente",
   "data": {
     "userId": "68fda092d832a694a0c77a88",
-    "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
     "firstName": "María",
     "lastName": "López Gómez",
     "documentType": "DNI",
@@ -365,7 +363,6 @@ GET /api/v1/users/status/ACTIVE
 ```json
 {
   "_id": "68fda092d832a694a0c77a88",
-  "keycloakId": "kR9mP2xL5nQ8wT4vY7zA",
   "firstName": "María",
   "lastName": "López Gómez",
   "documentType": "DNI",
@@ -389,7 +386,6 @@ GET /api/v1/users/status/ACTIVE
 db.users.createIndex({ "email": 1 }, { unique: true })
 db.users.createIndex({ "username": 1 }, { unique: true })
 db.users.createIndex({ "documentNumber": 1 }, { unique: true })
-db.users.createIndex({ "keycloakId": 1 }, { unique: true, sparse: true })
 db.users.createIndex({ "status": 1 })
 db.users.createIndex({ "role": 1 })
 ```
@@ -398,11 +394,11 @@ db.users.createIndex({ "role": 1 })
 
 | Rol | Descripción |
 |-----|-------------|
-| `Buyer` | Realm Role de Keycloak |
-| `Cashier` | Realm Role de Keycloak |
-| `admin` | Realm Role de Keycloak |
-| `doctor` | Realm Role de Keycloak |
-| `user` | Realm Role de Keycloak |
+| `Buyer` | Rol de usuario |
+| `Cashier` | Rol de usuario |
+| `admin` | Rol de usuario |
+| `doctor` | Rol de usuario |
+| `user` | Rol de usuario |
 
 ### Estados disponibles
 

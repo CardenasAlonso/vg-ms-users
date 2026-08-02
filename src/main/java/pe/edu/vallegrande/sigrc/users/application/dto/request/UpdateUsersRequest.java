@@ -23,7 +23,6 @@ public class UpdateUsersRequest {
     private String documentNumber;
 
     private String profileImagePath;
-    private String keycloakId;
     private UserRole role;
 
     @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
