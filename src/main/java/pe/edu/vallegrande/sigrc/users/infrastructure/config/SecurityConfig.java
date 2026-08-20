@@ -38,13 +38,14 @@ public class SecurityConfig {
     private static final String[] ACTUATOR_PATHS = {"/actuator/**"};
 
     @Bean
-    @Profile("dev")
+    @Profile({"dev", "default"})
     public SecurityWebFilterChain devSecurityWebFilterChain(ServerHttpSecurity http) {
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(SWAGGER_PATHS).permitAll()
                         .pathMatchers(ACTUATOR_PATHS).permitAll()
+                        .pathMatchers("/api/v1/profile", "/api/v1/profile/**").authenticated()
                         .pathMatchers(HttpMethod.GET, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.POST, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.PUT, API_USERS).hasAnyRole(ADMIN_ROLES)
