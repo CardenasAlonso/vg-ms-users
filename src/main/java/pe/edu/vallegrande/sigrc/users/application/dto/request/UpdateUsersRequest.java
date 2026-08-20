@@ -17,7 +17,7 @@ public class UpdateUsersRequest {
 
     private String username;
 
-    @Pattern(regexp = "DNI|CNE", message = "Tipo de documento inválido")
+    @Pattern(regexp = "^(DNI|CNE)?$", message = "Tipo de documento inválido")
     private String documentType;
 
     private String documentNumber;
