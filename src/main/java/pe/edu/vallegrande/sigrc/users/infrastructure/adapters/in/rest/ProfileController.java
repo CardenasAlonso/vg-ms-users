@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/profile")
 @Tag(name = "Profile", description = "Operaciones para gestion del perfil propio del usuario")
+// Comentario de prueba
 public class ProfileController {
 
     private final IProfileUseCase profileUseCase;
