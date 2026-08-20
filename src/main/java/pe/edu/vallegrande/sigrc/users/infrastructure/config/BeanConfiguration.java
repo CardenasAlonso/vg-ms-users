@@ -22,8 +22,9 @@ public class BeanConfiguration {
 
     @Bean
     public IUpdateUsersUseCase updateUsersUseCase(IUsersRepository repository,
-                                                  IAuthServiceClient authServiceClient) {
-        return new UpdateUsersUseCaseImpl(repository, authServiceClient);
+                                                  IAuthServiceClient authServiceClient,
+                                                  pe.edu.vallegrande.sigrc.users.domain.ports.out.IImageStoragePort imageStoragePort) {
+        return new UpdateUsersUseCaseImpl(repository, authServiceClient, imageStoragePort);
     }
 
     @Bean

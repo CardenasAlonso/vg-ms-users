@@ -6,4 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface IUpdateUsersUseCase {
     Mono<UsersResponse> update(String id, UpdateUsersRequest request);
+    Mono<UsersResponse> updateAvatar(String id, org.springframework.http.codec.multipart.FilePart filePart);
+    Mono<UsersResponse> deleteAvatar(String id);
+    Mono<Void> updateLastLogin(String id);
 }

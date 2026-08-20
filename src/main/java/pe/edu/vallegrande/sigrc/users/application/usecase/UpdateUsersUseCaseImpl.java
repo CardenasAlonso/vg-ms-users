@@ -26,6 +26,49 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
 
     private final IUsersRepository repository;
     private final IAuthServiceClient authServiceClient;
+    private final pe.edu.vallegrande.sigrc.users.domain.ports.out.IImageStoragePort imageStoragePort;
+
+    @Override
+    public Mono<UsersResponse> updateAvatar(String id, org.springframework.http.codec.multipart.FilePart filePart) {
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
+                .flatMap(user -> imageStoragePort.uploadImage(filePart, user.getUserId())
+                        .flatMap(imageUrl -> {
+                            user.setProfileImagePath(imageUrl);
+                            user.setUpdatedAt(LocalDateTime.now());
+                            return repository.save(user);
+                        }))
+                .map(UsersMapper::toResponse);
+    }
+
+    @Override
+    public Mono<UsersResponse> deleteAvatar(String id) {
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
+                .flatMap(user -> {
+                    if (user.getProfileImagePath() == null || user.getProfileImagePath().isBlank()) {
+                        return Mono.just(user);
+                    }
+                    return imageStoragePort.deleteImage(user.getProfileImagePath())
+                            .then(Mono.defer(() -> {
+                                user.setProfileImagePath(null);
+                                user.setUpdatedAt(LocalDateTime.now());
+                                return repository.save(user);
+                            }));
+                })
+                .map(UsersMapper::toResponse);
+    }
+
+    @Override
+    public Mono<Void> updateLastLogin(String id) {
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
+                .flatMap(user -> {
+                    user.setLastLogin(LocalDateTime.now());
+                    return repository.save(user);
+                })
+                .then();
+    }
 
     @Override
     public Mono<UsersResponse> update(String id, UpdateUsersRequest request) {

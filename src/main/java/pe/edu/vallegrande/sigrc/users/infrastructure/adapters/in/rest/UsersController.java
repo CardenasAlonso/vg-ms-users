@@ -80,4 +80,27 @@ public class UsersController {
         return restoreUseCase.restore(id)
                 .then(Mono.just(ApiResponse.ok("Usuario restaurado", null)));
     }
+
+    // PATCH /api/v1/users/{id}/avatar
+    @PatchMapping(value = "/{id}/avatar", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<ApiResponse<UsersResponse>> updateAvatar(
+            @PathVariable String id,
+            @RequestPart("file") org.springframework.http.codec.multipart.FilePart filePart) {
+        return updateUseCase.updateAvatar(id, filePart)
+                .map(user -> ApiResponse.ok("Avatar de usuario actualizado exitosamente", user));
+    }
+
+    // DELETE /api/v1/users/{id}/avatar
+    @DeleteMapping("/{id}/avatar")
+    public Mono<ApiResponse<UsersResponse>> deleteAvatar(@PathVariable String id) {
+        return updateUseCase.deleteAvatar(id)
+                .map(user -> ApiResponse.ok("Avatar de usuario eliminado exitosamente", user));
+    }
+
+    // PATCH /api/v1/users/{id}/last-login
+    @PatchMapping("/{id}/last-login")
+    public Mono<ApiResponse<Void>> updateLastLogin(@PathVariable String id) {
+        return updateUseCase.updateLastLogin(id)
+                .then(Mono.just(ApiResponse.ok("Último acceso actualizado", null)));
+    }
 }

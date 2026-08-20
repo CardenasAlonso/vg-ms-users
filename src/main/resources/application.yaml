@@ -36,3 +36,8 @@ logging:
   level:
     pe.edu.vallegrande.sigrc: INFO
     org.springframework.data.mongodb: INFO
+
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME:dwy6gb0gn}
+  api_key: ${CLOUDINARY_API_KEY:973672632453524}
+  api_secret: ${CLOUDINARY_API_SECRET:TJU2HYli0JLnmYLSqEbvytBgNJ4}

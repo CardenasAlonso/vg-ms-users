@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.sigrc.users.infrastructure.config;
+    package pe.edu.vallegrande.sigrc.users.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,10 +26,10 @@ import java.util.Map;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    private static final String API_USERS = "/api/v1/users/**";
+    private static final String[] API_USERS = {"/api/v1/users", "/api/v1/users/**"};
     private static final String ROLES_CLAIM = "roles";
 
-    private static final String[] ADMIN_ROLES = {"ADMIN", "USER"};
+    private static final String[] ADMIN_ROLES = {"ADMIN"};
 
     private static final String[] SWAGGER_PATHS = {
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/api-docs/**"
@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(SWAGGER_PATHS).permitAll()
                         .pathMatchers(ACTUATOR_PATHS).permitAll()
-                        .pathMatchers(HttpMethod.GET, API_USERS).authenticated()
+                        .pathMatchers(HttpMethod.GET, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.POST, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.PUT, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.PATCH, API_USERS).hasAnyRole(ADMIN_ROLES)
@@ -64,7 +64,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(SWAGGER_PATHS).denyAll()
                         .pathMatchers(ACTUATOR_PATHS).permitAll()
-                        .pathMatchers(HttpMethod.GET, API_USERS).authenticated()
+                        .pathMatchers(HttpMethod.GET, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.POST, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.PUT, API_USERS).hasAnyRole(ADMIN_ROLES)
                         .pathMatchers(HttpMethod.PATCH, API_USERS).hasAnyRole(ADMIN_ROLES)
