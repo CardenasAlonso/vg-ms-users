@@ -92,14 +92,13 @@ public class UpdateUsersUseCaseImpl implements IUpdateUsersUseCase {
                     }
 
                     updatedUsers.setUpdatedAt(LocalDateTime.now());
-                    return repository.save(updatedUsers)
-                            .flatMap(saved -> authServiceClient.updateUser(
-                                            currentUsername, saved.getUsername(), saved.getEmail(),
-                                            saved.getFirstName(), saved.getLastName(), saved.getRole())
-                                    .then(passwordChanged
-                                            ? authServiceClient.resetPassword(saved.getUsername(), request.getPassword())
-                                            : Mono.empty())
-                                    .thenReturn(saved));
+                    return authServiceClient.updateUser(
+                                    currentUsername, updatedUsers.getUsername(), updatedUsers.getEmail(),
+                                    updatedUsers.getFirstName(), updatedUsers.getLastName(), updatedUsers.getRole())
+                            .then(passwordChanged
+                                    ? authServiceClient.resetPassword(updatedUsers.getUsername(), request.getPassword())
+                                    : Mono.empty())
+                            .then(repository.save(updatedUsers));
                 })
                 .map(UsersMapper::toResponse);
     }

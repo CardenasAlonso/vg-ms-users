@@ -16,7 +16,7 @@ public class DeactivateUsersUseCaseImpl implements IDeactivateUsersUseCase {
     public Mono<Void> deactivate(String id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
-                .flatMap(users -> repository.deactivate(users.getUserId())
-                        .then(authServiceClient.disableUser(users.getUsername())));
+                .flatMap(users -> authServiceClient.disableUser(users.getUsername())
+                        .then(repository.deactivate(users.getUserId())));
     }
 }

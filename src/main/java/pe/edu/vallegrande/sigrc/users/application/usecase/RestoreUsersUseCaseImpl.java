@@ -17,7 +17,7 @@ public class RestoreUsersUseCaseImpl implements IRestoreUsersUseCase {
     public Mono<Void> restore(String id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Users", id)))
-                .flatMap(users -> repository.restore(users.getUserId())
-                        .then(authServiceClient.enableUser(users.getUsername())));
+                .flatMap(users -> authServiceClient.enableUser(users.getUsername())
+                        .then(repository.restore(users.getUserId())));
     }
 }

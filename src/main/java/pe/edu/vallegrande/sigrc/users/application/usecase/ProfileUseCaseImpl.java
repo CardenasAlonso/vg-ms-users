@@ -62,14 +62,13 @@ public class ProfileUseCaseImpl implements IProfileUseCase {
 
                     user.setUpdatedAt(LocalDateTime.now());
                     
-                    return repository.save(user)
-                            .flatMap(saved -> authServiceClient.updateUser(
-                                            currentUsername, saved.getUsername(), saved.getEmail(),
-                                            saved.getFirstName(), saved.getLastName(), saved.getRole())
-                                    .then(passwordChanged
-                                            ? authServiceClient.resetPassword(saved.getUsername(), request.getPassword())
-                                            : Mono.empty())
-                                    .thenReturn(saved));
+                    return authServiceClient.updateUser(
+                                    currentUsername, user.getUsername(), user.getEmail(),
+                                    user.getFirstName(), user.getLastName(), user.getRole())
+                            .then(passwordChanged
+                                    ? authServiceClient.resetPassword(user.getUsername(), request.getPassword())
+                                    : Mono.empty())
+                            .then(repository.save(user));
                 })
                 .map(UsersMapper::toResponse);
     }

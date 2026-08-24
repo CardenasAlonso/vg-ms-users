@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import pe.edu.vallegrande.sigrc.users.domain.exceptions.KeycloakIntegrationException;
 import pe.edu.vallegrande.sigrc.users.domain.model.UserRole;
 import pe.edu.vallegrande.sigrc.users.domain.ports.out.IAuthServiceClient;
 import reactor.core.publisher.Mono;
@@ -88,10 +89,8 @@ public class AuthServiceClientAdapter implements IAuthServiceClient {
                 .toBodilessEntity()
                 .then()
                 .doOnSuccess(v -> log.info("Auth OK: {}", action))
-                .onErrorResume(e -> {
-                    log.debug("Auth fallido {}: {}", action, e.getMessage());
-                    return Mono.empty();
-                });
+                .doOnError(e -> log.error("Auth fallido {}: {}", action, e.getMessage()))
+                .onErrorMap(e -> new KeycloakIntegrationException("No se pudo sincronizar con Keycloak " + action));
     }
 
     private Mono<Void> put(String uri, Map<String, Object> body, String action) {
@@ -104,9 +103,7 @@ public class AuthServiceClientAdapter implements IAuthServiceClient {
                 .toBodilessEntity()
                 .then()
                 .doOnSuccess(v -> log.info("Auth OK: {}", action))
-                .onErrorResume(e -> {
-                    log.debug("Auth fallido {}: {}", action, e.getMessage());
-                    return Mono.empty();
-                });
+                .doOnError(e -> log.error("Auth fallido {}: {}", action, e.getMessage()))
+                .onErrorMap(e -> new KeycloakIntegrationException("No se pudo sincronizar con Keycloak " + action));
     }
 }
