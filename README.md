@@ -457,6 +457,19 @@ cd vg-ms-users
 
 ---
 
+## Cifrado AES-CTR
+
+El proyecto incluye `AesCtrCipher`, basado en `AES/CTR/NoPadding` y el
+vector de 128 bits definido por NIST SP 800-38A. La clave debe ser AES de
+128, 192 o 256 bits, codificada en Base64, y proporcionarse mediante
+`CRYPTO_AES_KEY_BASE64`; nunca debe guardarse en el repositorio.
+
+Cada cifrado genera un IV aleatorio de 128 bits y almacena el valor como
+`Base64(IV || ciphertext)`. CTR ofrece confidencialidad, pero no integridad
+ni autenticacion; los datos descifrados deben validarse con un mecanismo de
+autenticacion aprobado antes de aceptarlos. Las contrasenas siguen usando
+BCrypt y no deben cifrarse reversiblemente.
+
 ## 👥 Equipo
 
 **Institución:** Vallegrande - SIGRC  
