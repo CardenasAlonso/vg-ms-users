@@ -30,6 +30,10 @@ public class UsersMapper {
 
     // Document → Domain
     public static Users toDomain(UsersDocument doc) {
+        return toDomain(doc, doc.getEmail());
+    }
+
+    public static Users toDomain(UsersDocument doc, String email) {
         return Users.builder()
                 .userId(doc.getId())
                 .firstName(doc.getFirstName())
@@ -37,7 +41,7 @@ public class UsersMapper {
                 .documentType(doc.getDocumentType())
                 .documentNumber(doc.getDocumentNumber())
                 .phone(doc.getPhone())
-                .email(doc.getEmail())
+                .email(email)
                 .username(doc.getUsername())
                 .password(doc.getPassword())
                 .profileImagePath(doc.getProfileImagePath())
@@ -51,6 +55,10 @@ public class UsersMapper {
 
     // Domain → Document
     public static UsersDocument toDocument(Users users) {
+        return toDocument(users, users.getEmail(), null);
+    }
+
+    public static UsersDocument toDocument(Users users, String email, String emailHash) {
         return UsersDocument.builder()
                 .id(users.getUserId())
                 .firstName(users.getFirstName())
@@ -58,7 +66,8 @@ public class UsersMapper {
                 .documentType(users.getDocumentType())
                 .documentNumber(users.getDocumentNumber())
                 .phone(users.getPhone())
-                .email(users.getEmail())
+                .email(email)
+                .emailHash(emailHash)
                 .username(users.getUsername())
                 .password(users.getPassword())
                 .profileImagePath(users.getProfileImagePath())

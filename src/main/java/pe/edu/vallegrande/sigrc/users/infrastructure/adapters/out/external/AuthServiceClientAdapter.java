@@ -2,6 +2,7 @@ package pe.edu.vallegrande.sigrc.users.infrastructure.adapters.out.external;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@Profile("!demo")
 public class AuthServiceClientAdapter implements IAuthServiceClient {
 
     private static final String INTERNAL_API_KEY_HEADER = "X-Internal-Key";

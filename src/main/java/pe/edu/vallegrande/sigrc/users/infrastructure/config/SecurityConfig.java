@@ -58,6 +58,14 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("demo")
+    public SecurityWebFilterChain demoSecurityWebFilterChain(ServerHttpSecurity http) {
+        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+                .build();
+    }
+
+    @Bean
     @Profile("prod")
     public SecurityWebFilterChain prodSecurityWebFilterChain(ServerHttpSecurity http) {
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
